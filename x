@@ -8,7 +8,7 @@
       "name": "AppInsightsHealthCheckAlert",
       "location": "global",
       "properties": {
-        "description": "Alert for Application Insights health check and response time issues.",
+        "description": "Alert for Application Insights health check availability.",
         "enabled": true,
         "scopes": [
           "[parameters('applicationInsightsResourceId')]"
@@ -21,17 +21,42 @@
             {
               "name": "HealthCheckAvailability",
               "metricName": "Availability",
-              "metricNamespace": "Microsoft.Insights/components",  // Correct namespace for App Insights
+              "metricNamespace": "Microsoft.Insights/components",
               "operator": "LessThan",
-              "threshold": 99,  // Availability threshold (less than 99% triggers the alert)
+              "threshold": 99,
               "timeAggregation": "Average"
-            },
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "AppInsightsResponseTimeAlert",
+      "location": "global",
+      "properties": {
+        "description": "Alert for Application Insights response time.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('applicationInsightsResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
             {
               "name": "ResponseTime",
               "metricName": "ResponseTime",
-              "metricNamespace": "Microsoft.Insights/components",  // Correct namespace for App Insights
+              "metricNamespace": "Microsoft.Insights/components",
               "operator": "GreaterThan",
-              "threshold": 120,  // Threshold for response time (greater than 120 ms triggers the alert)
+              "threshold": 120,
               "timeAggregation": "Average"
             }
           ]
