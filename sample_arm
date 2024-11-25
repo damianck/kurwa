@@ -1,0 +1,199 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "targetResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the App Service to monitor."
+      }
+    },
+    "actionGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the Action Group to notify when alerts are triggered."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "CpuTimeAlert",
+      "location": "global",
+      "properties": {
+        "description": "CPU Time exceeds 120 seconds.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('targetResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "CpuTimeThreshold",
+              "metricName": "CpuTime",
+              "metricNamespace": "Microsoft.Web/sites",
+              "operator": "GreaterThan",
+              "threshold": 120,
+              "timeAggregation": "Total"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "HeapMemoryUsageAlert",
+      "location": "global",
+      "properties": {
+        "description": "Heap Memory exceeds 80% of the working set.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('targetResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "MemoryWorkingSetThreshold",
+              "metricName": "MemoryWorkingSet",
+              "metricNamespace": "Microsoft.Web/sites",
+              "operator": "GreaterThan",
+              "threshold": 80,
+              "timeAggregation": "Average",
+              "dimensions": [
+                {
+                  "name": "Percentage",
+                  "operator": "Include",
+                  "values": ["*"]
+                }
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "ResponseTimeAlert",
+      "location": "global",
+      "properties": {
+        "description": "Response time exceeds 120 ms.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('targetResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "ResponseTimeThreshold",
+              "metricName": "AverageResponseTime",
+              "metricNamespace": "Microsoft.Web/sites",
+              "operator": "GreaterThan",
+              "threshold": 120,
+              "timeAggregation": "Average"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "HealthCheckStatusAlert",
+      "location": "global",
+      "properties": {
+        "description": "Health Check status is critical.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('targetResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "HealthCheckStatus",
+              "metricName": "HealthCheckStatus",
+              "metricNamespace": "Microsoft.Web/sites",
+              "operator": "GreaterThan",
+              "threshold": 1,
+              "timeAggregation": "Total"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "ExceptionTrackingAlert",
+      "location": "global",
+      "properties": {
+        "description": "Exception Alert - Tracks dynamic issue details.",
+        "enabled": true,
+        "scopes": [
+          "[parameters('targetResourceId')]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "@odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "ExceptionMetricThreshold",
+              "metricName": "Exceptions",
+              "metricNamespace": "Microsoft.Web/sites",
+              "operator": "GreaterThan",
+              "threshold": 1,
+              "timeAggregation": "Total",
+              "dimensions": [
+                {
+                  "name": "ExceptionType",
+                  "operator": "Include",
+                  "values": ["*"]
+                }
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    }
+  ]
+}
