@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "global"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the Log Analytics workspace."
+      }
+    },
+    "actionGroupIds": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Array of action group IDs to notify."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "DynamicExceptionAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "Exception alert with dynamic cause details",
+        "enabled": true,
+        "source": {
+          "query": "exceptions | summarize Count = count() by outerMessage, bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          },
+          "customWebhookPayload": {
+            "alertCause": "[concat('Exceptions: ', concatarray('outerMessage', '; '))]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
