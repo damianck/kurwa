@@ -1,0 +1,195 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "global"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the Log Analytics workspace."
+      }
+    },
+    "actionGroupIds": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Array of action group IDs to notify."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "HealthCheckAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "Health Check Failure Alert",
+        "enabled": true,
+        "source": {
+          "query": "availabilityResults | where success == false | summarize Count = count() by bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "ResponseTimeAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "Response Time Exceeded 120ms Alert",
+        "enabled": true,
+        "source": {
+          "query": "requests | where durationMs > 120 | summarize Count = count() by bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "CPUUsageAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "CPU Usage Exceeded Threshold Alert",
+        "enabled": true,
+        "source": {
+          "query": "performanceCounters | where counterName == 'Processor Time' and counterValue > 80 | summarize Count = count() by bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "MemoryHeapAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "Memory Heap Usage Exceeded Threshold Alert",
+        "enabled": true,
+        "source": {
+          "query": "performanceCounters | where counterName == 'Memory Working Set' and counterValue > 80 | summarize Count = count() by bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "DynamicExceptionAlert",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "Dynamic Exception Alert",
+        "enabled": true,
+        "source": {
+          "query": "exceptions | summarize Count = count() by outerMessage, bin(TimeGenerated, 5m) | where Count > 0",
+          "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 5,
+          "timeWindowInMinutes": 15
+        },
+        "action": {
+          "severity": 2,
+          "aznsAction": {
+            "actionGroup": "[parameters('actionGroupIds')]"
+          }
+        },
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "operator": "GreaterThan",
+              "metricMeasureColumn": "ResultCount"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
