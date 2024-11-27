@@ -1,0 +1,49 @@
+{
+  "type": "Microsoft.Insights/scheduledQueryRules",
+  "apiVersion": "2022-06-15-preview",
+  "name": "[concat(parameters('ruleName'), '-DynamicSummaryAlert')]",
+  "location": "[parameters('location')]",
+  "properties": {
+    "description": "Dynamic alert with injected summary fields",
+    "enabled": true,
+    "source": {
+      "query": "Perf | where CounterName == '% Processor Time' | summarize avg(CounterValue) by Computer",
+      "dataSourceId": "[parameters('logAnalyticsWorkspaceId')]",
+      "queryType": "ResultCount"
+    },
+    "schedule": {
+      "frequencyInMinutes": "[parameters('frequencyInMinutes')]",
+      "timeWindowInMinutes": "[parameters('timeWindowInMinutes')]"
+    },
+    "action": {
+      "severity": 2,
+      "aznsAction": {
+        "actionGroup": "[parameters('actionGroupId')]",
+        "emailSubject": "CPU Alert on {Computer}: Average Processor Time",
+        "customWebhookPayload": {
+          "alertSummary": "High CPU usage detected on {Computer} with average {CounterValue}% over the last {TimeWindow}.",
+          "dimensions": "{Computer}"
+        }
+      }
+    },
+    "criteria": {
+      "dimensions": [
+        {
+          "name": "Computer",
+          "operator": "Include",
+          "values": []
+        }
+      ],
+      "allOf": [
+        {
+          "query": "Perf | where CounterName == '% Processor Time' | summarize avg(CounterValue) by Computer",
+          "timeAggregation": "Average",
+          "metricMeasureColumn": "CounterValue",
+          "operator": "GreaterThan",
+          "threshold": 80
+        }
+      ]
+    },
+    "autoMitigate": true
+  }
+}
