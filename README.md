@@ -6,7 +6,7 @@ SQL task - we need to write query which shows us from all department which conta
 2)
 Write a SQL query to find departments with less than five employees, including those with no employees. 
 Display the department name along with the count of employees.
-
+'''aql
 Table structure:
 TABLE employees (
     employee_id INT PRIMARY KEY,
@@ -18,12 +18,12 @@ TABLE departments (
     department_id INT PRIMARY KEY,
     department_name VARCHAR(50)
 );
-
+'''
 # code review 
 https://gist.github.com/orange-buffalo/f4cc37b3a0cc827ee46e5466aaf0e093
 
 # java task - Find unique car make
-
+'''java
 public class UniqueCarMake {
 
 
@@ -43,6 +43,7 @@ public class UniqueCarMake {
        uniqueCars.forEach(System.out::println);
    }
 }
+'''
 # stream
 
 You have List<Integer>. {ten elements} 5 even and 5 odds. 
@@ -51,7 +52,7 @@ var variable = list.stream().filter(p -> p % 2);
 what type will be in this variable??
 
 # java task
-
+'''java
 
 import java.io.*;
 import java.util.HashMap;
@@ -148,4 +149,4 @@ public class Solution {
         System.out.println("");
     }
 }
-
+'''
