@@ -1,0 +1,5 @@
+SELECT d.id, d.name, COUNT(e.id) AS employee_count
+FROM department d
+         JOIN employee e ON d.id = e.department_id
+GROUP BY d.id, d.name
+HAVING COUNT(e.id) IN (2, 3);
